@@ -23,7 +23,6 @@ except ImportError:
 
 try:
     from rich.console import Console
-    from rich.table import Table
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
