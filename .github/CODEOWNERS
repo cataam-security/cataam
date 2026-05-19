@@ -1,0 +1,3 @@
+# Every file in this repository requires review from @cataam-security.
+# This rule applies to all PRs — nothing merges without an explicit approval.
+* @cataam-security
