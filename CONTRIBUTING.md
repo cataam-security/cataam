@@ -24,13 +24,28 @@ Thank you for contributing. This repository is the open-source initiative of the
 
 ---
 
+## Branch Naming
+
+Use the appropriate prefix so PRs are easy to triage at a glance:
+
+| Prefix | Use for | Example |
+|--------|---------|---------|
+| `feat/` | New tools, new CVE scripts, new templates | `feat/gcp-posture-check` |
+| `fix/` | Bug fixes, broken scripts, incorrect control mappings | `fix/ssl-audit-cipher-list` |
+| `cve/` | CVE lab additions | `cve/CVE-2024-12345` |
+| `docs/` | README, wiki, glossary, knowledge base only | `docs/iso27001-annex-a-update` |
+
+Keep branch names lowercase and hyphen-separated. Branches that don't follow this convention will be asked to rename before review.
+
+---
+
 ## Submitting a PR
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-tool`
+2. Create a branch using the convention above: `git checkout -b feat/my-tool`
 3. Make your changes
 4. Test your tool or template
-5. Open a pull request with a clear description of what it does and which framework it covers
+5. Open a pull request — the PR template will prompt you for the required details
 
 ---
 

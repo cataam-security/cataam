@@ -18,6 +18,19 @@ declare -a FINDINGS=()
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 
+# Emit a properly JSON-escaped string including surrounding quotes.
+# Handles backslashes, double-quotes, newlines, carriage returns, and tabs.
+# Backslash must be escaped first to avoid double-escaping subsequent replacements.
+json_str() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '"%s"' "$s"
+}
+
 usage() {
   cat <<EOF
 Usage: sudo $0 [OPTIONS]
@@ -59,9 +72,7 @@ log() {
   echo -e "${color}[${status}]${NC} [${control}] ${title}"
   [[ -n $detail ]] && echo -e "       ${detail}"
 
-  local escaped_detail
-  escaped_detail=$(echo "$detail" | sed 's/"/\\"/g')
-  FINDINGS+=("{\"control\":\"${control}\",\"level\":${CIS_LEVEL},\"title\":\"${title}\",\"status\":\"${status}\",\"detail\":\"${escaped_detail}\",\"framework\":\"CIS Benchmark Linux v3.0\"}")
+  FINDINGS+=("{\"control\":$(json_str "$control"),\"level\":${CIS_LEVEL},\"title\":$(json_str "$title"),\"status\":\"${status}\",\"detail\":$(json_str "$detail"),\"framework\":\"CIS Benchmark Linux v3.0\"}")
 }
 
 fix_if_enabled() {
@@ -286,10 +297,10 @@ if [[ -n "$JSON_OUTPUT" ]]; then
     echo "{"
     echo "  \"cataam_import_version\": \"1.0\","
     echo "  \"tool\": \"env-hardener\","
-    echo "  \"tool_version\": \"${SCRIPT_VERSION}\","
+    echo "  \"tool_version\": $(json_str "$SCRIPT_VERSION"),"
     echo "  \"framework\": \"CIS Benchmark Linux v3.0\","
     echo "  \"cis_level\": ${CIS_LEVEL},"
-    echo "  \"host\": \"${HOSTNAME}\","
+    echo "  \"host\": $(json_str "$HOSTNAME"),"
     echo "  \"timestamp\": \"${TIMESTAMP}\","
     echo "  \"summary\": {\"total\": ${TOTAL}, \"pass\": ${PASS}, \"fail\": ${FAIL}, \"warn\": ${WARN}, \"score_pct\": ${SCORE}},"
     echo "  \"findings\": ["
