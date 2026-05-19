@@ -12,12 +12,10 @@ import argparse
 import json
 import socket
 import ssl
-import sys
 from datetime import datetime, timezone
 
 try:
     from rich.console import Console
-    from rich.table import Table
     HAS_RICH = True
     console = Console()
 except ImportError:
@@ -143,7 +141,6 @@ def get_certificate_info(host: str, port: int, timeout: int) -> dict:
 
 def audit(host: str, port: int, timeout: int, pci_mode: bool) -> list:
     findings = []
-    now = datetime.now(timezone.utc)
 
     def finding(control, title, status, detail="", severity="MEDIUM", framework="PCI DSS 4.0"):
         findings.append({
