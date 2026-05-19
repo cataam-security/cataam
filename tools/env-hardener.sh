@@ -62,7 +62,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 log() {
-  local level=$1 control=$2 title=$3 status=$4 detail=${5:-""}
+  local _level=$1 control=$2 title=$3 status=$4 detail=${5:-""}
   local color=$NC
   case $status in
     PASS) color=$GREEN; ((PASS++)) ;;
@@ -83,7 +83,7 @@ fix_if_enabled() {
 
 echo "========================================================"
 echo " Cataam CIS Benchmark Linux Hardening Script v${SCRIPT_VERSION}"
-echo " Level: ${CIS_LEVEL} | Mode: $(${DRY_RUN} && echo 'Audit' || (${FIX_MODE} && echo 'Fix' || echo 'Audit'))"
+echo " Level: ${CIS_LEVEL} | Mode: $(if $DRY_RUN; then echo 'Audit'; elif $FIX_MODE; then echo 'Fix'; else echo 'Audit'; fi)"
 echo " Host: $(hostname) | Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "========================================================"
 
@@ -305,7 +305,6 @@ if [[ -n "$JSON_OUTPUT" ]]; then
     echo "  \"summary\": {\"total\": ${TOTAL}, \"pass\": ${PASS}, \"fail\": ${FAIL}, \"warn\": ${WARN}, \"score_pct\": ${SCORE}},"
     echo "  \"findings\": ["
     local_ifs="$IFS"; IFS=","
-    local joined
     joined=$(printf '%s,' "${FINDINGS[@]}")
     joined="${joined%,}"
     echo "    ${joined}"
