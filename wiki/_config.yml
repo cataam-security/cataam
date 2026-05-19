@@ -1,0 +1,30 @@
+title: Cataam Security Wiki
+description: Open-source GRC and security knowledge base maintained by the Cataam team
+baseurl: "/cataam/wiki"
+url: "https://cataam-security.github.io"
+
+theme: jekyll-theme-midnight
+
+author:
+  name: Cataam Security Team
+  url: https://cataam.com
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+seo:
+  name: Cataam Security Wiki
+  description: Free GRC and security compliance reference — maintained by the Cataam team
+
+social:
+  links:
+    - https://cataam.com
+    - https://github.com/cataam-security/cataam

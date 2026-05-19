@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 80" width="260" height="80">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="260" height="80" rx="8" fill="#0f172a"/>
+
+  <!-- Shield icon (heroicons shield-check outline, scaled to 36x36 at x=12,y=22) -->
+  <g transform="translate(12, 22) scale(1.5)">
+    <path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
+      fill="none" stroke="url(#shieldGrad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+      filter="url(#glow)"/>
+  </g>
+
+  <!-- CATAAM wordmark -->
+  <text x="54" y="38" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="28" font-weight="900" letter-spacing="-0.5" filter="url(#glow)">
+    <tspan fill="#60a5fa">CAT</tspan><tspan fill="#ffffff">AAM</tspan>
+  </text>
+
+  <!-- Underline gradient bar -->
+  <defs>
+    <linearGradient id="underlineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="50%" style="stop-color:#60a5fa"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect x="54" y="41" width="152" height="1.5" rx="1" fill="url(#underlineGrad)"/>
+
+  <!-- Subtitle -->
+  <text x="54" y="56" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" letter-spacing="1.5" fill="#93c5fd" text-transform="uppercase">
+    SECURITY  ·  COMPLIANCE
+  </text>
+
+  <!-- Glowing dot -->
+  <circle cx="208" cy="20" r="3" fill="#60a5fa" opacity="0.9"/>
+</svg>
