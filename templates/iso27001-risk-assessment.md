@@ -2,6 +2,8 @@
 
 [![Maintained by Cataam](https://img.shields.io/badge/Maintained%20by-Cataam-3b82f6?style=flat-square)](https://cataam.com)
 
+> **📋 Automate this template.** Generate, score, and maintain your ISO 27001 risk register automatically — with continuous evidence harvesting and a generated Statement of Applicability — using [ISO 27001 compliance automation](https://cataam.com/compliance/iso27001/). The maintained, online version of this template lives at [cataam.com/resources/iso27001-risk-assessment-template](https://cataam.com/resources/iso27001-risk-assessment-template/).
+
 **Organization:** [COMPANY NAME]  
 **Assessment Date:** [DATE]  
 **Version:** 1.0  
@@ -158,6 +160,16 @@ Risks that management has formally accepted rather than treated:
 | Management Representative | | | |
 
 **Next scheduled review:** [DATE]
+
+---
+
+## Automate your ISO 27001 program
+
+Filling this in by hand is the slow part. CATAAM pre-builds the full 93-control Annex A library, harvests evidence continuously from AWS, GitHub, and Jira, and generates your Statement of Applicability automatically.
+
+- 👉 **[ISO 27001 compliance automation](https://cataam.com/compliance/iso27001/)** — automate the whole ISMS
+- 📋 **[ISO 27001 certification checklist](https://cataam.com/blog/iso-27001-certification-checklist/)** — the 12 steps to certified
+- 💸 **[How much does ISO 27001 cost?](https://cataam.com/blog/iso-27001-cost/)** — full 2026 cost breakdown
 
 ---
 
