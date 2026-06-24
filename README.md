@@ -108,9 +108,9 @@ Audits TLS versions, cipher suites, and certificate validity. Flags deprecated p
 
 Ready-to-use compliance document templates:
 
-- [ISO 27001 Risk Assessment](./templates/iso27001-risk-assessment.md)
-- [SOC 2 Evidence Checklist](./templates/soc2-evidence-checklist.md)
-- [HIPAA Security Rule Checklist](./templates/hipaa-security-rule-checklist.md)
+- [ISO 27001 Risk Assessment](./templates/iso27001-risk-assessment.md) — likelihood × impact scoring matrix with Annex A mapping. Automate it with [ISO 27001 compliance automation](https://cataam.com/compliance/iso27001/).
+- [SOC 2 Evidence Checklist](./templates/soc2-evidence-checklist.md) — control-by-control evidence list for a Type II audit. Automate it with [SOC 2 compliance automation](https://cataam.com/compliance/soc2/).
+- [HIPAA Security Rule Checklist](./templates/hipaa-security-rule-checklist.md) — administrative, physical, and technical safeguards. Automate it with [HIPAA compliance automation](https://cataam.com/compliance/hipaa/).
 
 ---
 
