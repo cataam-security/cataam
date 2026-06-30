@@ -1,0 +1,27 @@
+{
+  "_comment": "Prompt Guard detection rules. Contributors: add patterns here — no code changes needed. Each rule: id, label, category (secret|pii|code), severity, and either a regex `pattern` or `entropy` config. See ../RULE-PACKS section of ARCHITECTURE.md.",
+  "version": "0.1.0",
+  "rules": [
+    {"id": "aws-access-key-id", "label": "AWS Access Key ID", "category": "secret", "severity": "CRITICAL", "pattern": "\\b(?:AKIA|ASIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA)[0-9A-Z]{16}\\b"},
+    {"id": "aws-secret-access-key", "label": "AWS Secret Access Key", "category": "secret", "severity": "CRITICAL", "pattern": "(?i)aws_secret_access_key\\s*[=:]\\s*[\"']?([A-Za-z0-9/+=]{40})[\"']?"},
+    {"id": "github-token", "label": "GitHub Token", "category": "secret", "severity": "CRITICAL", "pattern": "\\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{36,255}\\b"},
+    {"id": "openai-api-key", "label": "OpenAI API Key", "category": "secret", "severity": "CRITICAL", "pattern": "\\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\\b"},
+    {"id": "anthropic-api-key", "label": "Anthropic API Key", "category": "secret", "severity": "CRITICAL", "pattern": "\\bsk-ant-[A-Za-z0-9_-]{20,}\\b"},
+    {"id": "google-api-key", "label": "Google API Key", "category": "secret", "severity": "CRITICAL", "pattern": "\\bAIza[0-9A-Za-z_-]{35}\\b"},
+    {"id": "slack-token", "label": "Slack Token", "category": "secret", "severity": "HIGH", "pattern": "\\bxox[baprs]-[0-9A-Za-z-]{10,}\\b"},
+    {"id": "stripe-secret-key", "label": "Stripe Secret Key", "category": "secret", "severity": "CRITICAL", "pattern": "\\b(?:sk|rk)_(?:live|test)_[0-9A-Za-z]{20,}\\b"},
+    {"id": "private-key-block", "label": "Private Key (PEM)", "category": "secret", "severity": "CRITICAL", "pattern": "-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----"},
+    {"id": "jwt", "label": "JSON Web Token", "category": "secret", "severity": "HIGH", "pattern": "\\beyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\b"},
+    {"id": "slack-webhook", "label": "Slack Webhook URL", "category": "secret", "severity": "HIGH", "pattern": "https://hooks\\.slack\\.com/services/[A-Za-z0-9/_+-]+"},
+    {"id": "basic-auth-url", "label": "Credentials in URL", "category": "secret", "severity": "HIGH", "pattern": "\\b[a-z][a-z0-9+.-]*://[^/\\s:@]+:[^/\\s:@]+@[^\\s]+"},
+    {"id": "generic-assigned-secret", "label": "Assigned Secret/Token/Password", "category": "secret", "severity": "HIGH", "pattern": "(?i)\\b(?:password|passwd|pwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token|client[_-]?secret|private[_-]?key)\\b\\s*[=:]\\s*[\"']?([^\\s\"',;]{8,})[\"']?"},
+
+    {"id": "email", "label": "Email Address", "category": "pii", "severity": "MEDIUM", "pattern": "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b"},
+    {"id": "credit-card", "label": "Credit Card Number", "category": "pii", "severity": "HIGH", "pattern": "\\b(?:\\d[ -]*?){13,19}\\b", "luhn": true},
+    {"id": "us-ssn", "label": "US SSN", "category": "pii", "severity": "HIGH", "pattern": "\\b(?!000|666|9\\d\\d)\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}\\b"},
+    {"id": "phone-na", "label": "Phone Number (NANP)", "category": "pii", "severity": "LOW", "pattern": "\\b(?:\\+?1[-.\\s]?)?\\(?[2-9]\\d{2}\\)?[-.\\s]?[2-9]\\d{2}[-.\\s]?\\d{4}\\b"},
+    {"id": "ipv4-private", "label": "Private IPv4", "category": "pii", "severity": "LOW", "pattern": "\\b(?:10\\.\\d{1,3}|172\\.(?:1[6-9]|2\\d|3[01])|192\\.168)\\.\\d{1,3}\\.\\d{1,3}\\b"},
+
+    {"id": "high-entropy-token", "label": "High-Entropy String", "category": "secret", "severity": "MEDIUM", "entropy": {"min_len": 24, "threshold": 4.0, "charset": "base64hex"}}
+  ]
+}
