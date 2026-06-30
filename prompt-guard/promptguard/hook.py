@@ -62,16 +62,16 @@ def install_hook() -> int:
         except Exception:
             sys.stderr.write(f"could not parse {settings_path}; not modifying it.\n")
             return 1
+    # Resolve an absolute command so it works even when Claude Code's hook shell doesn't have
+    # the venv on PATH: prefer the `promptguard` console script, else this exact interpreter.
+    import shutil
+    exe = shutil.which("promptguard")
+    command = f'"{exe}" hook' if exe else f'"{sys.executable}" -m promptguard.cli hook'
+
     hooks = data.setdefault("hooks", {})
     ups = hooks.setdefault("UserPromptSubmit", [])
-    entry = {"type": "command", "command": "promptguard hook", "timeout": 15}
-    already = any(
-        isinstance(h, dict) and h.get("command") == "promptguard hook"
-        for group in ups for h in (group.get("hooks", [group]) if isinstance(group, dict) else [])
-    )
-    # Claude Code accepts either a flat list of command entries or matcher-groups; use the flat form.
-    flat = any(isinstance(h, dict) and h.get("command") == "promptguard hook" for h in ups)
-    if already or flat:
+    entry = {"type": "command", "command": command, "timeout": 15}
+    if any(isinstance(h, dict) and "promptguard" in str(h.get("command", "")) for h in ups):
         sys.stderr.write("Prompt Guard hook already installed in ~/.claude/settings.json\n")
         return 0
     ups.append(entry)
