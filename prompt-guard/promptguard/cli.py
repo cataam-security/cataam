@@ -73,14 +73,24 @@ def cmd_serve(args):
 def cmd_push(args):
     """Push the evidence JSONL to a Cataam platform — it latches each event as audit evidence for
     the AI data-egress control (ISO 42001 / NIST AI RMF / EU AI Act Art.12)."""
-    import os, urllib.request
+    import os, urllib.request, urllib.error
     events = [json.loads(l) for l in open(args.input) if l.strip()]
     url = (args.url or os.environ.get("CATAAM_URL", "")).rstrip("/") + "/api/ai-gov/ccm/egress-evidence"
+    headers = {"Content-Type": "application/json"}
+    token = args.token or os.environ.get("CATAAM_TOKEN", "")
     key = args.api_key or os.environ.get("CATAAM_API_KEY", "")
+    if token:                                   # a logged-in user's JWT (Authorization: Bearer)
+        headers["Authorization"] = f"Bearer {token}"
+    if key:                                     # or an org integration API key (X-API-Key)
+        headers["X-API-Key"] = key
     req = urllib.request.Request(url, data=json.dumps({"events": events}).encode(),
-                                 headers={"Content-Type": "application/json", "X-API-Key": key}, method="POST")
-    with urllib.request.urlopen(req, timeout=20) as r:
-        body = r.read().decode()
+                                 headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            body = r.read().decode()
+    except urllib.error.HTTPError as e:
+        err(f"push failed [{e.code}] {url}: {e.read().decode()[:300]}")
+        return 1
     err(f"pushed {len(events)} event(s) -> {url}: {body}")
     return 0
 
@@ -110,7 +120,8 @@ def main(argv=None):
     pu = sub.add_parser("push", help="push evidence JSONL to a Cataam platform (latches as audit evidence)")
     pu.add_argument("--input", required=True, help="the evidence .jsonl produced by scan/redact/serve")
     pu.add_argument("--url", help="Cataam base URL (or env CATAAM_URL)")
-    pu.add_argument("--api-key", help="Cataam API key (or env CATAAM_API_KEY)")
+    pu.add_argument("--api-key", help="Cataam org API key, X-API-Key (or env CATAAM_API_KEY)")
+    pu.add_argument("--token", help="a logged-in user's JWT, Authorization: Bearer (or env CATAAM_TOKEN)")
     pu.set_defaults(func=cmd_push)
 
     args = p.parse_args(argv)
