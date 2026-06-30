@@ -32,6 +32,22 @@ It is **local-first** (the prompt is scanned on your laptop; nothing is sent any
 
 ---
 
+## Install
+
+```bash
+# prerequisites: Python ≥ 3.8, pip ≥ 21.3, setuptools ≥ 61 (zero runtime deps)
+pip install -U pip setuptools        # one-time, if your pip/setuptools are older
+pip install -e prompt-guard          # puts the `promptguard` command on your PATH
+#   colour output:  pip install -e "prompt-guard[rich]"
+```
+
+No pip / locked-down box? The core is pure stdlib, so you can skip installing entirely and
+alias the command instead:
+
+```bash
+alias promptguard='python3 -m promptguard.cli'   # run from inside the prompt-guard/ folder
+```
+
 ## Quick start — guard your terminal LLM in one line
 
 You already ask LLMs from your terminal. Put `promptguard wrap --` in front and **nothing else changes** — you type your question once, normally. The secret is stripped on the way out and the answer is re-hydrated on the way back:

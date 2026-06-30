@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cataam-prompt-guard"
+version = "0.1.0"
+description = "Local-first prompt hygiene for public LLMs — redact secrets/PII before they leave the machine, with auditor-ready evidence."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+authors = [{ name = "Cataam", email = "hello@cataam.com" }]
+keywords = ["llm", "dlp", "redaction", "secrets", "pii", "ai-governance", "iso-42001", "eu-ai-act"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
+# The core is intentionally ZERO-dependency (Python 3.8+ stdlib only).
+dependencies = []
+
+[project.optional-dependencies]
+rich = ["rich>=13.7.0"]   # nicer coloured CLI output (optional)
+
+[project.scripts]
+promptguard = "promptguard.cli:main"
+
+[project.urls]
+Homepage = "https://cataam.com"
+Source = "https://github.com/cataam-security/cataam/tree/main/prompt-guard"
+
+[tool.setuptools]
+packages = ["promptguard"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+promptguard = ["*.json"]   # ship rules.json + controls.json with the package
