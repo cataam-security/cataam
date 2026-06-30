@@ -187,6 +187,18 @@ llm()    { promptguard wrap --destination "$1" -- command llm "$@"; }
 """
 
 
+def cmd_hook(args):
+    """Run as a Claude Code UserPromptSubmit hook (reads JSON on stdin; blocks on secret)."""
+    from .hook import run_hook
+    return run_hook()
+
+
+def cmd_install_hook(args):
+    """Merge the UserPromptSubmit hook into ~/.claude/settings.json."""
+    from .hook import install_hook
+    return install_hook()
+
+
 def cmd_install(args):
     """Print a shell snippet that makes guarding invisible — add it to ~/.zshrc (or ~/.bashrc)."""
     sys.stdout.write(_SHELL_SNIPPET)
@@ -234,6 +246,11 @@ def main(argv=None):
 
     ins = sub.add_parser("install", help="print a shell snippet so `claude`/`ask` auto-guard")
     ins.set_defaults(func=cmd_install)
+
+    hk = sub.add_parser("hook", help="run as a Claude Code UserPromptSubmit hook (blocks prompts with secrets)")
+    hk.set_defaults(func=cmd_hook)
+    ih = sub.add_parser("install-hook", help="wire the block-on-secret hook into ~/.claude/settings.json")
+    ih.set_defaults(func=cmd_install_hook)
 
     args = p.parse_args(argv)
     sys.exit(args.func(args))

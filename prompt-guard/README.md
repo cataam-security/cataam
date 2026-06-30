@@ -73,7 +73,20 @@ Now keep typing `claude` exactly as before (the guard engages only on the one-sh
 ask claude -p "rotate AKIAIOSFODNN7EXAMPLE for me"   # auto-guarded
 ```
 
-> Fully-interactive TUI chat (keystroke-level) is covered by the **[browser extension](./extension/)** and the planned endpoint agent — see [ARCHITECTURE.md](./ARCHITECTURE.md). The terminal wrapper covers the one-shot/piped path, which is where pasted secrets actually leak.
+> The wrapper covers the one-shot/`-p`/piped path. For a **fully-interactive Claude Code session**, the wrapper can't intercept keystrokes — so use the hook below instead.
+
+### Interactive Claude Code — block secrets at submit (fail-closed)
+
+Inside the interactive `claude` TUI, typed prompts go straight to the model — a shell wrapper never sees them. Claude Code's `UserPromptSubmit` hook is the real interception point. It can't rewrite a prompt, so Prompt Guard runs **fail-closed**: if your prompt contains a secret/PII it **blocks** the submission (the text never reaches the model) and logs the blocked egress as evidence.
+
+```bash
+promptguard install-hook       # merges into ~/.claude/settings.json (idempotent)
+# restart `claude`, then type a prompt containing a key:
+#   🛡  Prompt Guard blocked this prompt — it was NOT sent to the model.
+#      Detected 1 sensitive item(s): AWS Access Key ID (AKI…LE (20 chars))
+```
+
+This is the honest coverage for live terminal chat: it can't silently redact mid-conversation, but it **stops the leak** and records a clean control event. Browser chat (ChatGPT/Claude/Gemini web) is covered by the **[browser extension](./extension/)**.
 
 <details><summary>Lower-level commands (scan / redact / restore / serve)</summary>
 
