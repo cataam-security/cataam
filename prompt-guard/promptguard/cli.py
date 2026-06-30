@@ -70,6 +70,21 @@ def cmd_serve(args):
     return 0
 
 
+def cmd_push(args):
+    """Push the evidence JSONL to a Cataam platform — it latches each event as audit evidence for
+    the AI data-egress control (ISO 42001 / NIST AI RMF / EU AI Act Art.12)."""
+    import os, urllib.request
+    events = [json.loads(l) for l in open(args.input) if l.strip()]
+    url = (args.url or os.environ.get("CATAAM_URL", "")).rstrip("/") + "/api/ai-gov/ccm/egress-evidence"
+    key = args.api_key or os.environ.get("CATAAM_API_KEY", "")
+    req = urllib.request.Request(url, data=json.dumps({"events": events}).encode(),
+                                 headers={"Content-Type": "application/json", "X-API-Key": key}, method="POST")
+    with urllib.request.urlopen(req, timeout=20) as r:
+        body = r.read().decode()
+    err(f"pushed {len(events)} event(s) -> {url}: {body}")
+    return 0
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="promptguard", description="Local-first prompt hygiene for public LLMs.")
     p.add_argument("--version", action="version", version=f"cataam-prompt-guard {__version__}")
@@ -92,6 +107,11 @@ def main(argv=None):
     sv.add_argument("--host", default="127.0.0.1")
     sv.add_argument("--port", type=int, default=8765)
     sv.set_defaults(func=cmd_serve)
+    pu = sub.add_parser("push", help="push evidence JSONL to a Cataam platform (latches as audit evidence)")
+    pu.add_argument("--input", required=True, help="the evidence .jsonl produced by scan/redact/serve")
+    pu.add_argument("--url", help="Cataam base URL (or env CATAAM_URL)")
+    pu.add_argument("--api-key", help="Cataam API key (or env CATAAM_API_KEY)")
+    pu.set_defaults(func=cmd_push)
 
     args = p.parse_args(argv)
     sys.exit(args.func(args))

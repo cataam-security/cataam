@@ -70,7 +70,13 @@ Every redaction emits a Cataam-importable `ai_egress_control` event mapping the 
 | **ISO 27001:2022** | A.8.12 (data leakage prevention), A.5.34 (PII) |
 | **SOC 2** | CC6.7 |
 
-The event carries only **non-sensitive previews** (`AKI…LE (20 chars)`) — never the raw secret. Stream the JSONL into your SIEM, or import it into the [Cataam](https://cataam.com) platform to latch it as audit evidence against your AI-governance control.
+The event carries only **non-sensitive previews** (`AKI…LE (20 chars)`) — never the raw secret. Stream the JSONL into your SIEM, or push it to the [Cataam](https://cataam.com) platform — it latches each event as **auditor-ready evidence** for the *"AI prompt/data egress to public LLMs is controlled"* control (ISO 42001 A.6.2.8 / A.9.2, NIST GAI-4, EU AI Act Art.12):
+
+```bash
+export CATAAM_URL=https://app.yourorg.cataam.com CATAAM_API_KEY=...
+python3 -m promptguard.cli push --input evidence.jsonl
+#  -> {"ingested": 12, "total": 12}   (now visible under AI Governance → Continuous Monitoring)
+```
 
 ---
 
