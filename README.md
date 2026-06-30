@@ -27,6 +27,7 @@ Everything here is MIT-licensed and production-ready. Use it standalone, integra
 
 | Folder | Purpose | Who It Helps |
 |--------|---------|--------------|
+| [`/prompt-guard`](./prompt-guard/) | Local-first prompt hygiene — redact secrets/keys/PII before they reach public LLMs; outputs ISO 42001 / NIST AI RMF / EU AI Act evidence | Security, AppSec, Compliance, Developers |
 | [`/tools`](./tools/) | Hardening scripts, CVE scanners, cloud posture checks, TLS audits | DevOps, SecOps, Compliance Engineers |
 | [`/cve-lab`](./cve-lab/) | CVE detection and mitigation scripts, updated within 48h of major disclosures | Incident Responders, SREs |
 | [`/knowledge`](./knowledge/) | CIS Benchmark guides, ISO 27001 control mappings, compliance cheatsheets | Security Analysts, Auditors |

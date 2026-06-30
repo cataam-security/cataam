@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body{width:280px;margin:0;font:13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a}
+  .hd{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;padding:12px 14px;font-weight:700}
+  .b{padding:12px 14px}
+  .row{display:flex;justify-content:space-between;margin:6px 0}
+  .dot{height:8px;width:8px;border-radius:50%;display:inline-block;margin-right:6px}
+  .ok{background:#16a34a}.bad{background:#dc2626}
+  .n{font-size:22px;font-weight:800;color:#1d4ed8}
+  a{color:#1d4ed8;text-decoration:none}
+</style></head><body>
+  <div class="hd">Cataam Prompt Guard</div>
+  <div class="b">
+    <div class="row"><span>Local engine</span><span id="engine"><span class="dot bad"></span>checking…</span></div>
+    <div class="row"><span>Redacted this session</span><span class="n" id="count">0</span></div>
+    <div class="row" style="opacity:.7;font-size:12px;margin-top:10px">Start it with:<br><code>promptguard serve --port 8765</code></div>
+    <div class="row" style="margin-top:8px"><a href="https://github.com/cataam-security/cataam/tree/main/prompt-guard" target="_blank">Docs & rule packs →</a></div>
+  </div>
+  <script src="popup.js"></script>
+</body></html>

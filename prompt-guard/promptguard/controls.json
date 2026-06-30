@@ -1,0 +1,34 @@
+{
+  "_comment": "Maps each redaction event to the compliance controls it provides evidence for. This is what turns a prompt-hygiene event into auditor-ready evidence (the Cataam moat). Contributors: refine/extend the mappings.",
+  "version": "0.1.0",
+  "frameworks": {
+    "iso42001": "ISO/IEC 42001:2023 (AI Management System)",
+    "nist_ai_rmf": "NIST AI RMF 1.0 + Generative AI Profile (NIST AI 600-1)",
+    "eu_ai_act": "EU AI Act (Reg. 2024/1689)",
+    "iso27001": "ISO/IEC 27001:2022 (Annex A)",
+    "soc2": "SOC 2 (Trust Services Criteria)"
+  },
+  "by_category": {
+    "secret": {
+      "iso42001": ["A.6.2.4 (data for AI systems)", "A.7.4 (data quality/provenance)", "B.6.2 (responsible use)"],
+      "nist_ai_rmf": ["GOVERN 1.2", "MAP 4.1 (data privacy)", "MEASURE 2.10 (data leakage)", "MANAGE 2.2"],
+      "eu_ai_act": ["Art.12 (record-keeping/logging)", "Art.10 (data governance)"],
+      "iso27001": ["A.5.34 (PII protection)", "A.8.12 (data leakage prevention)"],
+      "soc2": ["CC6.1", "CC6.7 (restrict data movement)"]
+    },
+    "pii": {
+      "iso42001": ["A.7.4 (data quality)", "B.6.2 (responsible use)"],
+      "nist_ai_rmf": ["MAP 4.1 (privacy)", "MEASURE 2.10"],
+      "eu_ai_act": ["Art.10 (data governance)", "Art.12 (logging)"],
+      "iso27001": ["A.5.34 (privacy & PII)", "A.8.12 (data leakage prevention)"],
+      "soc2": ["CC6.7", "P (Privacy criteria)"]
+    },
+    "code": {
+      "iso42001": ["A.6.2.4", "B.6.2"],
+      "nist_ai_rmf": ["MAP 4.1", "MEASURE 2.10"],
+      "eu_ai_act": ["Art.12 (logging)"],
+      "iso27001": ["A.8.12 (data leakage prevention)", "A.8.4 (access to source code)"],
+      "soc2": ["CC6.7"]
+    }
+  }
+}

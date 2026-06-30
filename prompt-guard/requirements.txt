@@ -1,0 +1,4 @@
+# Prompt Guard core requires NOTHING beyond the Python 3.8+ standard library.
+# Optional extras:
+rich>=13.7.0          # nicer CLI output (optional)
+# presidio-analyzer   # (roadmap v0.2) richer ML-based PII NER — optional, heavier
