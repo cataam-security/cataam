@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Prompt Guard CLI.
 
+    promptguard wrap -- claude -p "why does AKIA... 403?"   # ★ transparent: guard ANY LLM CLI in place
+    promptguard install                              # print shell snippet so `claude`/`ask` are auto-guarded
     promptguard scan    < prompt.txt                 # detect only (exit 1 if sensitive found)
     promptguard redact  < prompt.txt --output ev.json  # redacted prompt to stdout, evidence to JSON
     echo "$RESPONSE" | promptguard restore --vault v.json   # re-hydrate a model response
@@ -10,11 +12,14 @@ Pure stdlib. `pip install rich` for colour (optional).
 """
 import argparse
 import json
+import os
 import sys
 
 from . import __version__
 from .engine import Engine
-from .evidence import write_event
+from .evidence import build_event, write_event
+
+PG_HOME = os.path.expanduser(os.environ.get("PROMPTGUARD_HOME", "~/.promptguard"))
 
 try:
     from rich.console import Console
@@ -95,6 +100,102 @@ def cmd_push(args):
     return 0
 
 
+def _load_vault(path):
+    from .vault import Vault
+    v = Vault()
+    if path and os.path.exists(path):
+        v._to_original = json.load(open(path))
+        v._to_placeholder = {orig: ph for ph, orig in v._to_original.items()}
+    return v
+
+
+def cmd_wrap(args):
+    """Transparently guard a downstream LLM CLI. Redacts every secret/PII span found in the
+    command's arguments *and* its piped stdin BEFORE the process is exec'd, then re-hydrates any
+    «PG:…» placeholders in its streamed output so the answer is still useful. Drop-in prefix:
+
+        promptguard wrap -- claude -p "my deploy 403s with AKIA…, why?"
+
+    The user types their question once, normally; the secret never leaves the machine."""
+    import subprocess
+    cmd = list(args.cmd or [])
+    if cmd and cmd[0] == "--":
+        cmd = cmd[1:]
+    if not cmd:
+        err("usage: promptguard wrap [--destination NAME] -- <llm-command> [args...]")
+        return 2
+
+    os.makedirs(PG_HOME, exist_ok=True)
+    vault_path = args.vault or os.path.join(PG_HOME, "vault.json")
+    out_path = args.output if args.output is not None else os.path.join(PG_HOME, "evidence.jsonl")
+    dest = args.destination or os.path.basename(cmd[0])
+
+    eng = Engine()
+    vault = _load_vault(vault_path)
+    findings = []
+
+    # 1) redact every argument in place (the prompt usually rides in argv: `claude -p "…"`, `llm "…"`)
+    safe_cmd = []
+    for a in cmd:
+        res = eng.inspect(a, surface="cli", destination=dest, vault=vault)
+        safe_cmd.append(res.redacted)
+        findings += res.findings
+
+    # 2) redact piped stdin too (`cat secrets.txt | claude`)
+    stdin_data = None
+    if not sys.stdin.isatty():
+        res = eng.inspect(sys.stdin.read(), surface="cli", destination=dest, vault=vault)
+        stdin_data, findings = res.redacted, findings + res.findings
+
+    if findings:
+        event = build_event(findings, destination=dest, action="redact", surface="cli")
+        err(f"🛡  Prompt Guard: redacted {len(findings)} secret/PII span(s) "
+            f"[{event['max_severity']}] before calling {cmd[0]} → {dest}")
+        if out_path:
+            write_event(event, out_path)
+        if not vault.is_empty():
+            json.dump(vault._to_original, open(vault_path, "w"))
+
+    # 3) run the real LLM CLI; restore placeholders in its output, line by line (near-live)
+    proc = subprocess.Popen(
+        safe_cmd, text=True, bufsize=1,
+        stdin=(subprocess.PIPE if stdin_data is not None else None),
+        stdout=subprocess.PIPE, stderr=None)
+    if stdin_data is not None:
+        try: proc.stdin.write(stdin_data); proc.stdin.close()
+        except BrokenPipeError: pass
+    for line in proc.stdout:
+        sys.stdout.write(vault.restore(line))
+        sys.stdout.flush()
+    return proc.wait()
+
+
+_SHELL_SNIPPET = r"""# ── Cataam Prompt Guard — transparent secret redaction for terminal LLMs ──
+# Quick guarded one-shot question to any LLM CLI:
+ask()  { promptguard wrap -- "$@"; }
+# Keep typing `claude` exactly as before — guard engages only for the one-shot/piped
+# path (where redaction is reliable); the interactive TUI runs untouched.
+claude() {
+  if [ -t 0 ] && [[ "$*" != *"-p"* && "$*" != *"--print"* ]]; then
+    command claude "$@"
+  else
+    promptguard wrap --destination claude.ai -- command claude "$@"
+  fi
+}
+# llm / ollama one-shots are always one-shot, so guard them wholesale:
+llm()    { promptguard wrap --destination "$1" -- command llm "$@"; }
+"""
+
+
+def cmd_install(args):
+    """Print a shell snippet that makes guarding invisible — add it to ~/.zshrc (or ~/.bashrc)."""
+    sys.stdout.write(_SHELL_SNIPPET)
+    err("\n# Add the above to your shell rc, e.g.:\n"
+        "#   promptguard install >> ~/.zshrc && source ~/.zshrc\n"
+        "# Then just use your LLM normally:  ask 'why does AKIA... 403?'   (secret auto-redacted)")
+    return 0
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="promptguard", description="Local-first prompt hygiene for public LLMs.")
     p.add_argument("--version", action="version", version=f"cataam-prompt-guard {__version__}")
@@ -123,6 +224,16 @@ def main(argv=None):
     pu.add_argument("--api-key", help="Cataam org API key, X-API-Key (or env CATAAM_API_KEY)")
     pu.add_argument("--token", help="a logged-in user's JWT, Authorization: Bearer (or env CATAAM_TOKEN)")
     pu.set_defaults(func=cmd_push)
+
+    w = sub.add_parser("wrap", help="transparently guard a downstream LLM CLI (drop-in prefix)")
+    w.add_argument("--destination", help="logical destination label for evidence (default: the command name)")
+    w.add_argument("--vault", help=f"placeholder→value map (default: {PG_HOME}/vault.json)")
+    w.add_argument("--output", help=f"append evidence JSONL (default: {PG_HOME}/evidence.jsonl; '' to disable)")
+    w.add_argument("cmd", nargs=argparse.REMAINDER, help="-- <llm-command> [args...]")
+    w.set_defaults(func=cmd_wrap)
+
+    ins = sub.add_parser("install", help="print a shell snippet so `claude`/`ask` auto-guard")
+    ins.set_defaults(func=cmd_install)
 
     args = p.parse_args(argv)
     sys.exit(args.func(args))

@@ -32,29 +32,43 @@ It is **local-first** (the prompt is scanned on your laptop; nothing is sent any
 
 ---
 
-## Quick start
+## Quick start — guard your terminal LLM in one line
+
+You already ask LLMs from your terminal. Put `promptguard wrap --` in front and **nothing else changes** — you type your question once, normally. The secret is stripped on the way out and the answer is re-hydrated on the way back:
 
 ```bash
-# no install needed — pure stdlib core
-cd prompt-guard
-
-# 1) scan a prompt (exit 1 if sensitive data found)
-echo 'deploy fails: AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' \
-  | python3 -m promptguard.cli scan
-
-# 2) redact reversibly — the safe prompt is printed; secrets go to a local vault
-echo 'my key is AKIAIOSFODNN7EXAMPLE, why 403?' \
-  | python3 -m promptguard.cli redact --vault vault.json --output evidence.jsonl
-#  -> my key is «PG:AWS_ACCESS_KEY_ID:1», why 403?
-
-# 3) re-hydrate the model's answer locally
-echo 'rotate «PG:AWS_ACCESS_KEY_ID:1» now' | python3 -m promptguard.cli restore --vault vault.json
-
-# 4) run the local API the browser extension talks to (loopback only)
-python3 -m promptguard.cli serve --port 8765 --output evidence.jsonl
+promptguard wrap -- claude -p "my deploy 403s with AKIAIOSFODNN7EXAMPLE, why?"
+#  🛡  Prompt Guard: redacted 1 secret/PII span(s) [CRITICAL] before calling claude → claude.ai
+#  the model receives:  "...403s with «PG:AWS_ACCESS_KEY_ID:1», why?"   ← secret never leaves
+#  you see the answer:  "...rotate AKIAIOSFODNN7EXAMPLE..."             ← de-tokenized locally
 ```
 
-Then load the **[browser extension](./extension/)** unpacked (`chrome://extensions` → *Load unpacked*) to redact pastes into ChatGPT/Claude/Gemini automatically.
+It redacts secrets in the **arguments and any piped stdin**, works with **any** CLI (`claude`, `llm`, `ollama run`, …), and auto-writes audit evidence to `~/.promptguard/evidence.jsonl`.
+
+### Make it invisible
+
+```bash
+promptguard install >> ~/.zshrc && source ~/.zshrc
+```
+
+Now keep typing `claude` exactly as before (the guard engages only on the one-shot/`-p`/piped path, where redaction is reliable; the interactive TUI runs untouched), or use the drop-in `ask`:
+
+```bash
+ask claude -p "rotate AKIAIOSFODNN7EXAMPLE for me"   # auto-guarded
+```
+
+> Fully-interactive TUI chat (keystroke-level) is covered by the **[browser extension](./extension/)** and the planned endpoint agent — see [ARCHITECTURE.md](./ARCHITECTURE.md). The terminal wrapper covers the one-shot/piped path, which is where pasted secrets actually leak.
+
+<details><summary>Lower-level commands (scan / redact / restore / serve)</summary>
+
+```bash
+cd prompt-guard
+echo 'AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' | python3 -m promptguard.cli scan
+echo 'my key is AKIAIOSFODNN7EXAMPLE, why 403?' | python3 -m promptguard.cli redact --vault vault.json --output evidence.jsonl
+echo 'rotate «PG:AWS_ACCESS_KEY_ID:1» now'       | python3 -m promptguard.cli restore --vault vault.json
+python3 -m promptguard.cli serve --port 8765 --output evidence.jsonl   # local API for the browser extension
+```
+</details>
 
 ---
 
