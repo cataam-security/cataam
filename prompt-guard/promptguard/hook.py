@@ -68,13 +68,25 @@ def install_hook() -> int:
     exe = shutil.which("promptguard")
     command = f'"{exe}" hook' if exe else f'"{sys.executable}" -m promptguard.cli hook'
 
+    def refs_pg(obj):
+        return isinstance(obj, dict) and "promptguard" in str(obj.get("command", ""))
+
     hooks = data.setdefault("hooks", {})
-    ups = hooks.setdefault("UserPromptSubmit", [])
-    entry = {"type": "command", "command": command, "timeout": 15}
-    if any(isinstance(h, dict) and "promptguard" in str(h.get("command", "")) for h in ups):
-        sys.stderr.write("Prompt Guard hook already installed in ~/.claude/settings.json\n")
-        return 0
-    ups.append(entry)
+    ups = hooks.get("UserPromptSubmit", [])
+    # Drop any prior Prompt Guard entries (flat OR matcher-group) so we can re-write the correct
+    # shape — this also repairs a malformed entry from an earlier version.
+    cleaned = []
+    for grp in ups:
+        if refs_pg(grp):
+            continue
+        if isinstance(grp, dict) and isinstance(grp.get("hooks"), list):
+            grp = {**grp, "hooks": [h for h in grp["hooks"] if not refs_pg(h)]}
+            if not grp["hooks"]:
+                continue
+        cleaned.append(grp)
+    # Claude Code requires the matcher + hooks[] group form (matcher empty = every prompt).
+    cleaned.append({"matcher": "", "hooks": [{"type": "command", "command": command, "timeout": 15}]})
+    hooks["UserPromptSubmit"] = cleaned
     json.dump(data, open(settings_path, "w"), indent=2)
     sys.stderr.write(
         "✓ Installed Prompt Guard UserPromptSubmit hook -> ~/.claude/settings.json\n"
