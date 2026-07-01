@@ -6,9 +6,11 @@
 
 # Prompt Guard — local-first prompt hygiene for public LLMs
 
-[![Maintained by Cataam](https://img.shields.io/badge/Maintained%20by-Cataam-3b82f6?style=flat-square)](https://cataam.com)
+[![Maintained by Cataam](https://img.shields.io/badge/Maintained%20by-Cataam-3b82f6?style=flat-square)](https://cataam.com/prompt-guard/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](../LICENSE)
 [![Status: alpha](https://img.shields.io/badge/status-alpha-orange?style=flat-square)](./ARCHITECTURE.md)
+
+**🌐 [cataam.com/prompt-guard](https://cataam.com/prompt-guard/)** · **📺 [Watch the 80-second launch video](https://www.youtube.com/watch?v=gFAiCBClKjE)** · **📝 [Why it matters for ISO 42001](https://cataam.com/blog/prompt-guard-stop-secrets-leaking-to-llms/)**
 
 Employees paste code, API keys, passwords and customer data into ChatGPT, Claude, Copilot and Gemini every day — and it leaves the corporate boundary into models you don't control. Samsung banned ChatGPT in 2023 after engineers pasted source code; today **~35% of all data put into AI tools is sensitive, and source code is the #1 leaked category** (Cyberhaven).
 
