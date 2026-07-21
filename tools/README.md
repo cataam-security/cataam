@@ -21,6 +21,7 @@ Practical security scripts that produce audit-ready evidence. Each tool maps its
 | [`cve-scanner.py`](./cve-scanner.py) | NVD CVE lookup + control mapping | ISO 27001 A.12, SOC 2 CC7 |
 | [`cloud-posture-check.py`](./cloud-posture-check.py) | AWS CIS Foundations audit | CIS AWS v1.5, SOC 2 CC6 |
 | [`ssl-tls-audit.py`](./ssl-tls-audit.py) | TLS/cipher suite audit | PCI DSS 4.0 Req 4.2, SOC 2 CC6 |
+| [`mcp-exposure-scanner.py`](./mcp-exposure-scanner.py) | Find exposed MCP (AI tool) servers + posture | SOC 2 CC6, ISO 27001 A.8.8, ISO 42001 A.6 |
 
 ---
 
@@ -128,3 +129,30 @@ Options:
 ```bash
 python ssl-tls-audit.py --host api.example.com --pci --output tls-findings.json
 ```
+
+---
+
+## mcp-exposure-scanner.py
+
+[![Maintained by Cataam](https://img.shields.io/badge/Maintained%20by-Cataam-3b82f6?style=flat-square)](https://cataam.com)
+
+Finds **internet-reachable Model Context Protocol (MCP) servers** — the middleware that lets an AI model call real tools — and checks the three posture issues behind the July-2026 MCP vulnerability wave. MCP servers are meant to run on loopback for a local client, so an externally-reachable one is *shadow AI infrastructure*: a privileged, tool-wielding endpoint with no front door.
+
+**Read-only.** It only speaks the MCP `initialize` handshake and the read-only `tools/list` method — it never calls `tools/call` (no tool is executed) and sends no exploit payloads. No third-party dependencies (Python 3.8+ standard library only).
+
+```bash
+python mcp-exposure-scanner.py --target host-or-url --authorized
+python mcp-exposure-scanner.py --target 10.0.0.5 --port 8080 --authorized --output json
+```
+
+Checks (each mapped to SOC 2 / ISO 27001 / ISO 42001 controls):
+
+| Finding | Meaning |
+|---------|---------|
+| `MCP-SERVER-EXPOSED` | An MCP server completes the handshake from outside the host (should be loopback-only). |
+| `MCP-UNAUTH-CAPABILITY-DISCLOSURE` | `tools/list` answers with no credentials; escalates when exec/SSRF-capable tools are exposed. |
+| `MCP-ORIGIN-NOT-VALIDATED` | A foreign `Origin` is accepted — DNS-rebinding / CSRF (MCP Python SDK **CVE-2026-59950** class). |
+
+Exit code is `1` if anything is flagged, `0` if clean — drop it into CI to gate on exposed AI infrastructure. Related advisories: CVE-2026-59950 / -52869 / -52870 (MCP Python SDK), meta-ads-mcp CVE-2026-54547/-54549, LangBot CVE-2026-54449, ToolHive CVE-2026-58196.
+
+> Background: [Exposed MCP Servers Are the New Unguarded Door](https://cataam.com/blog/exposed-mcp-servers-attack-surface/)
